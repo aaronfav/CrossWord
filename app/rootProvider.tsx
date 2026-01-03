@@ -24,7 +24,6 @@ export function RootProvider({ children }: { children: ReactNode }) {
         chains: [base],
         transports: { [base.id]: http() },
         connectors: [injected()],
-        autoConnect: true,
         storage: createStorage({
           storage: {
             getItem: (key) => safeLocalStorage.getItem(key),
@@ -37,7 +36,7 @@ export function RootProvider({ children }: { children: ReactNode }) {
   );
 
   return (
-    <WagmiProvider config={wagmiConfig}>
+    <WagmiProvider config={wagmiConfig} reconnectOnMount>
       <OnchainKitProvider
         apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
         chain={base}
