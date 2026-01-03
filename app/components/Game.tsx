@@ -98,6 +98,22 @@ export function Game() {
     return Math.min(durationSec, Math.round((end - startTime) / 1000));
   }, [startTime, endTime, durationSec]);
 
+  const endGame = useCallback(async () => {
+    if (screen === "result") return;
+    setScreen("result");
+    setEndTime(Date.now());
+    if (!rootWord) return;
+    const response = await fetch("/api/reveal", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rootWord }),
+    });
+    if (response.ok) {
+      const data = await response.json();
+      setPossibleWords(data.possibleWords ?? []);
+    }
+  }, [screen, rootWord]);
+
   useEffect(() => {
     if (screen !== "play") return;
     if (timeLeft <= 0) return;
@@ -224,21 +240,6 @@ export function Game() {
     setMessage("");
   }
 
-  const endGame = useCallback(async () => {
-    if (screen === "result") return;
-    setScreen("result");
-    setEndTime(Date.now());
-    if (!rootWord) return;
-    const response = await fetch("/api/reveal", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rootWord }),
-    });
-    if (response.ok) {
-      const data = await response.json();
-      setPossibleWords(data.possibleWords ?? []);
-    }
-  }, [screen, rootWord]);
 
   function restartGame() {
     setScreen("select");
