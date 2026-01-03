@@ -3,7 +3,10 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
-    "app/api/new-game/route": ["./node_modules/word-list/words.txt"],
+    "/api/new-game": [
+      "node_modules/word-list/words.txt",
+      "node_modules/.pnpm/**/node_modules/word-list/words.txt",
+    ],
   },
   webpack: (config) => {
     config.externals.push("pino-pretty", "lokijs", "encoding");
