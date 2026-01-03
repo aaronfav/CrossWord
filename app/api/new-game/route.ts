@@ -35,10 +35,11 @@ export function GET(request: NextRequest) {
       durationSec: config.durationSec,
       requiredCount: config.requiredCount,
     });
-  } catch (err) {
+  } catch (err: unknown) {
+    const details = err instanceof Error ? err.message : String(err);
     console.error("new-game error", err);
     return NextResponse.json(
-      { error: "Failed to start a new game", details: err?.message },
+      { error: "Failed to start a new game", details },
       { status: 500 },
     );
   }
