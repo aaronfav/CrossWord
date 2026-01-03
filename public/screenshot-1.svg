@@ -1,0 +1,11 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="800" fill="#ffffff"/>
+  <rect x="80" y="80" width="1040" height="640" rx="24" fill="#f2f2f2"/>
+  <text x="140" y="180" font-size="36" fill="#111111" font-family="Inter, Arial, sans-serif">Select difficulty</text>
+  <rect x="140" y="240" width="280" height="140" rx="16" fill="#0000ff"/>
+  <rect x="460" y="240" width="280" height="140" rx="16" fill="#0000ff"/>
+  <rect x="780" y="240" width="280" height="140" rx="16" fill="#0000ff"/>
+  <text x="280" y="320" font-size="28" text-anchor="middle" fill="#ffffff" font-family="Inter, Arial, sans-serif">Easy</text>
+  <text x="600" y="320" font-size="28" text-anchor="middle" fill="#ffffff" font-family="Inter, Arial, sans-serif">Medium</text>
+  <text x="920" y="320" font-size="28" text-anchor="middle" fill="#ffffff" font-family="Inter, Arial, sans-serif">Hard</text>
+</svg>

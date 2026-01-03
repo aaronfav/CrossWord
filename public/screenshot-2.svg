@@ -1,0 +1,10 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="800" fill="#ffffff"/>
+  <rect x="80" y="80" width="1040" height="640" rx="24" fill="#f2f2f2"/>
+  <text x="140" y="180" font-size="36" fill="#111111" font-family="Inter, Arial, sans-serif">Gameplay</text>
+  <rect x="140" y="240" width="360" height="90" rx="12" fill="#ffffff" stroke="#e0e0e0"/>
+  <rect x="520" y="240" width="180" height="90" rx="12" fill="#0000ff"/>
+  <text x="610" y="300" font-size="24" text-anchor="middle" fill="#ffffff" font-family="Inter, Arial, sans-serif">Submit</text>
+  <rect x="140" y="360" width="920" height="260" rx="16" fill="#ffffff" stroke="#e0e0e0"/>
+  <text x="180" y="420" font-size="24" fill="#5a5a5a" font-family="Inter, Arial, sans-serif">Accepted words</text>
+</svg>

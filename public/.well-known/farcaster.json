@@ -1,0 +1,27 @@
+{
+  "accountAssociation": {
+    "header": "PLACEHOLDER_HEADER",
+    "payload": "PLACEHOLDER_PAYLOAD",
+    "signature": "PLACEHOLDER_SIGNATURE"
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "crossword",
+    "homeUrl": "https://<domain>/",
+    "iconUrl": "https://<domain>/icon.svg",
+    "splashImageUrl": "https://<domain>/splash.svg",
+    "splashBackgroundColor": "#ffffff",
+    "primaryCategory": "games",
+    "tags": ["word", "puzzle", "base"],
+    "heroImageUrl": "https://<domain>/hero.svg",
+    "screenshotUrls": [
+      "https://<domain>/screenshot-1.svg",
+      "https://<domain>/screenshot-2.svg"
+    ],
+    "tagline": "Find every sub-word before the timer ends.",
+    "ogTitle": "Crossword",
+    "ogDescription": "Race the clock to form valid sub-words.",
+    "ogImageUrl": "https://<domain>/og.svg",
+    "noindex": true
+  }
+}

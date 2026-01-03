@@ -1,0 +1,40 @@
+import { Difficulty } from "./gameConfig";
+
+export const ROOT_WORDS: Record<Difficulty, string[]> = {
+  easy: [
+    "triangle",
+    "postcard",
+    "document",
+    "calendar",
+    "platform",
+    "solution",
+    "distance",
+    "friendly",
+    "minister",
+    "security",
+  ],
+  medium: [
+    "restaurant",
+    "adventure",
+    "statement",
+    "backplate",
+    "condition",
+    "framework",
+    "lightning",
+    "assistant",
+    "placement",
+    "transport",
+  ],
+  hard: [
+    "regulation",
+    "distraction",
+    "intersection",
+    "calibration",
+    "conversation",
+    "organization",
+    "reconsider",
+    "transaction",
+    "laboratory",
+    "communication",
+  ],
+};

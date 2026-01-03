@@ -1,0 +1,8 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#ffffff"/>
+  <rect x="100" y="110" width="1000" height="410" rx="36" fill="#0000ff"/>
+  <text x="600" y="320" font-size="88" text-anchor="middle" fill="#ffffff" font-family="Inter, Arial, sans-serif">Crossword</text>
+  <text x="600" y="390" font-size="32" text-anchor="middle" fill="#ffffff" font-family="Inter, Arial, sans-serif">
+    Subword sprint for Base + Farcaster
+  </text>
+</svg>

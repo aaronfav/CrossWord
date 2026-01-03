@@ -1,0 +1,10 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#ffffff"/>
+  <rect x="80" y="80" width="1040" height="470" rx="40" fill="#f2f2f2"/>
+  <rect x="120" y="140" width="200" height="200" rx="24" fill="#0000ff"/>
+  <text x="220" y="260" font-size="72" text-anchor="middle" fill="#ffffff" font-family="Inter, Arial, sans-serif">C</text>
+  <text x="360" y="220" font-size="64" fill="#111111" font-family="Inter, Arial, sans-serif">Crossword</text>
+  <text x="360" y="290" font-size="28" fill="#5a5a5a" font-family="Inter, Arial, sans-serif">
+    Build sub-words before the clock hits zero.
+  </text>
+</svg>

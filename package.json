@@ -1,0 +1,46 @@
+{
+  "name": "crossword",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "preinstall": "node scripts/check-node-version.mjs",
+    "install:anynode": "node scripts/run-with-node.mjs install",
+    "dev:anynode": "node scripts/run-with-node.mjs dev",
+    "install:docker": "node scripts/run-docker.mjs install",
+    "dev:docker": "node scripts/run-docker.mjs dev",
+    "deploy:actions": "hardhat run scripts/deploy-actions.ts --network base",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@coinbase/onchainkit": "latest",
+    "@farcaster/miniapp-sdk": "latest",
+    "@tanstack/react-query": "^5.81.5",
+    "@metamask/sdk": "~0.33.1",
+    "next": "15.3.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "viem": "^2.31.6",
+    "wagmi": "^2.16.3",
+    "word-list": "^4.1.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@next/eslint-plugin-next": "^15.3.4",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.4",
+    "hardhat": "^2.22.8",
+    "typescript": "^5",
+    "vitest": "^2.1.4"
+  },
+  "engines": {
+    "node": ">=20 <23"
+  }
+}
