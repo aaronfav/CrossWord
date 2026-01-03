@@ -27,17 +27,31 @@ type BestScore = {
   timeUsed: number;
 };
 
-type NewGameResponse =
-  | {
-      rootWord: string;
-      durationSec: number;
-      requiredCount: number;
-    }
-  | {
-      error: string;
-      message?: string;
-      details?: string;
-    };
+type NewGameSuccess = {
+  rootWord: string;
+  durationSec: number;
+  requiredCount: number;
+};
+
+type NewGameError = {
+  error: string;
+  message?: string;
+  details?: string;
+};
+
+type NewGameResponse = NewGameSuccess | NewGameError;
+
+function isNewGameSuccess(
+  data: NewGameResponse | null,
+): data is NewGameSuccess {
+  return Boolean(
+    data &&
+      "rootWord" in data &&
+      typeof data.rootWord === "string" &&
+      typeof data.durationSec === "number" &&
+      typeof data.requiredCount === "number",
+  );
+}
 
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 const ACTIONS_CONTRACT_ADDRESS =
@@ -243,15 +257,15 @@ export function Game() {
       return;
     }
 
-    if (!data?.rootWord) {
-      setMessage("Unable to start a new game. Missing root word.");
+    if (!isNewGameSuccess(data)) {
+      setMessage("Unable to start a new game. Unexpected response.");
       return;
     }
 
     setRootWord(data.rootWord);
-    setDurationSec(data.durationSec ?? 0);
-    setRequiredCount(data.requiredCount ?? 0);
-    setTimeLeft(data.durationSec ?? 0);
+    setDurationSec(data.durationSec);
+    setRequiredCount(data.requiredCount);
+    setTimeLeft(data.durationSec);
     setStartTime(Date.now());
     setEndTime(null);
     setScreen("play");
