@@ -2,8 +2,18 @@
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import { Wallet } from "@coinbase/onchainkit/wallet";
-import { useAccount, useConnect, useDisconnect, useWriteContract } from "wagmi";
+import {
+  useAccount,
+  useChainId,
+  useConnect,
+  useDisconnect,
+  usePublicClient,
+  useSwitchChain,
+  useWriteContract,
+} from "wagmi";
 import { injected } from "wagmi/connectors";
+import { base } from "wagmi/chains";
+import { parseEventLogs } from "viem";
 import { DIFFICULTY_CONFIG, Difficulty } from "../lib/gameConfig";
 import { addUniqueWord, normalizeWord } from "../lib/wordUtils";
 import { MiniAppReady } from "./MiniAppReady";
@@ -22,6 +32,15 @@ const ACTIONS_CONTRACT_ADDRESS =
   process.env.NEXT_PUBLIC_ACTIONS_CONTRACT_ADDRESS as
     | `0x${string}`
     | undefined;
+const EXPECTED_CHAIN_ID = Number(
+  process.env.NEXT_PUBLIC_CHAIN_ID ?? base.id,
+);
+const DEBUG_ENABLED =
+  process.env.NEXT_PUBLIC_DEBUG_CROSSWORD === "true";
+const EXPECTED_CHAIN_LABEL =
+  EXPECTED_CHAIN_ID === base.id
+    ? base.name
+    : `chain ${EXPECTED_CHAIN_ID}`;
 
 const DIFFICULTY_ENUM: Record<Difficulty, number> = {
   easy: 0,
@@ -32,6 +51,11 @@ const DIFFICULTY_ENUM: Record<Difficulty, number> = {
 function shortenAddress(address?: string) {
   if (!address) return "";
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
+function debugLog(...args: unknown[]) {
+  if (!DEBUG_ENABLED) return;
+  console.log("[crossword]", ...args);
 }
 
 function InjectedWalletButton() {
@@ -75,6 +99,7 @@ function setBestScore(difficulty: Difficulty, score: BestScore) {
 }
 
 export function Game() {
+  const { address, isConnected } = useAccount();
   const [screen, setScreen] = useState<GameState>("select");
   const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
   const [rootWord, setRootWord] = useState("");
@@ -90,7 +115,11 @@ export function Game() {
   const [miniAppDetected, setMiniAppDetected] = useState(false);
   const [txMessage, setTxMessage] = useState("");
   const [pendingAction, setPendingAction] = useState<string | null>(null);
+  const [pendingLabel, setPendingLabel] = useState("");
   const { writeContractAsync } = useWriteContract();
+  const chainId = useChainId();
+  const { switchChainAsync } = useSwitchChain();
+  const publicClient = usePublicClient();
 
   const timeUsed = useMemo(() => {
     if (!startTime) return 0;
@@ -144,24 +173,75 @@ export function Game() {
     }
   }, [screen, difficulty, foundWords.length, timeUsed]);
 
-  async function startGame(nextDifficulty: Difficulty) {
+  async function startGame(
+    nextDifficulty: Difficulty,
+    sessionId?: string,
+  ) {
     setMessage("");
     setTxMessage("");
+    setPendingLabel("");
     setPossibleWords([]);
     setFoundWords([]);
     setInputValue("");
     setDifficulty(nextDifficulty);
 
-    const response = await fetch(`/api/new-game?difficulty=${nextDifficulty}`);
-    if (!response.ok) {
-      setMessage("Unable to start a new game. Try again.");
+    debugLog("startGame", {
+      difficulty: nextDifficulty,
+      sessionId,
+      chainId,
+      contract: ACTIONS_CONTRACT_ADDRESS,
+    });
+
+    let response: Response;
+    try {
+      response = await fetch(
+        `/api/new-game?difficulty=${nextDifficulty}`,
+      );
+    } catch (err) {
+      console.error("[crossword] new-game fetch error", err);
+      setMessage(
+        "Unable to start a new game. Network error occurred.",
+      );
       return;
     }
-    const data = await response.json();
+
+    let data: {
+      rootWord?: string;
+      durationSec?: number;
+      requiredCount?: number;
+      error?: string;
+      details?: string;
+    } | null = null;
+    try {
+      data = await response.json();
+    } catch (err) {
+      console.error("[crossword] new-game parse error", err);
+    }
+
+    if (!response.ok) {
+      debugLog("new-game failed", {
+        status: response.status,
+        data,
+      });
+      const detail =
+        data?.message ?? data?.error ?? response.statusText;
+      setMessage(
+        detail
+          ? `Unable to start a new game: ${detail}`
+          : "Unable to start a new game. Try again.",
+      );
+      return;
+    }
+
+    if (!data?.rootWord) {
+      setMessage("Unable to start a new game. Missing root word.");
+      return;
+    }
+
     setRootWord(data.rootWord);
-    setDurationSec(data.durationSec);
-    setRequiredCount(data.requiredCount);
-    setTimeLeft(data.durationSec);
+    setDurationSec(data.durationSec ?? 0);
+    setRequiredCount(data.requiredCount ?? 0);
+    setTimeLeft(data.durationSec ?? 0);
     setStartTime(Date.now());
     setEndTime(null);
     setScreen("play");
@@ -172,27 +252,107 @@ export function Game() {
     actionDifficulty: Difficulty,
   ) {
     if (!ACTIONS_CONTRACT_ADDRESS) {
-      setTxMessage("Contract address missing. Gameplay will continue.");
-      return;
+      const err =
+        "Missing NEXT_PUBLIC_ACTIONS_CONTRACT_ADDRESS. Set it in your deployment env.";
+      setMessage(err);
+      setTxMessage(err);
+      return null;
+    }
+    if (!Number.isFinite(EXPECTED_CHAIN_ID)) {
+      const err =
+        "Missing NEXT_PUBLIC_CHAIN_ID. Set it in your deployment env.";
+      setMessage(err);
+      setTxMessage(err);
+      return null;
+    }
+    if (!isConnected || !address) {
+      const err = "Connect a wallet before starting a game.";
+      setMessage(err);
+      setTxMessage(err);
+      return null;
+    }
+    if (chainId !== EXPECTED_CHAIN_ID) {
+      const err = `Wrong network. Switch to ${EXPECTED_CHAIN_LABEL} to continue.`;
+      setMessage(err);
+      setTxMessage(err);
+      try {
+        await switchChainAsync({ chainId: EXPECTED_CHAIN_ID });
+      } catch (err) {
+        console.error("[crossword] switch chain failed", err);
+      }
+      return null;
+    }
+    if (!publicClient) {
+      setMessage("Blockchain client unavailable. Reload and try again.");
+      return null;
     }
     setPendingAction(action);
+    setPendingLabel("Confirm in wallet...");
+    debugLog("sendAction", {
+      action,
+      difficulty: actionDifficulty,
+      chainId,
+      contract: ACTIONS_CONTRACT_ADDRESS,
+      address,
+    });
     try {
-      await writeContractAsync({
+      const hash = await writeContractAsync({
         address: ACTIONS_CONTRACT_ADDRESS,
         abi: actionsAbi,
         functionName: action,
         args: [DIFFICULTY_ENUM[actionDifficulty]],
       });
-    } catch {
-      setTxMessage("Transaction rejected or failed. Gameplay continues.");
+      debugLog("tx submitted", { hash });
+      setPendingLabel("Waiting for confirmation...");
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash,
+      });
+      debugLog("tx receipt", {
+        status: receipt.status,
+        hash: receipt.transactionHash,
+      });
+
+      const decodedLogs = parseEventLogs({
+        abi: actionsAbi,
+        logs: receipt.logs,
+        strict: false,
+      });
+      const actionEvents = decodedLogs.filter(
+        (log) => log.eventName === "Action",
+      );
+      debugLog("decoded logs", actionEvents);
+
+      const sessionId =
+        actionEvents[0]?.args?.timestamp !== undefined
+          ? `${hash}:${actionEvents[0].args.timestamp}`
+          : hash;
+      debugLog("sessionId", sessionId);
+
+      if (receipt.status !== "success") {
+        setTxMessage("Transaction reverted. Try again.");
+        return null;
+      }
+
+      return {
+        hash,
+        receiptStatus: receipt.status,
+        actionEvents,
+        sessionId,
+      };
+    } catch (err) {
+      console.error("[crossword] transaction error", err);
+      setTxMessage("Transaction rejected or failed.");
+      return null;
     } finally {
       setPendingAction(null);
+      setPendingLabel("");
     }
   }
 
   async function handleStartDifficulty(nextDifficulty: Difficulty) {
-    await sendAction("startDifficulty", nextDifficulty);
-    await startGame(nextDifficulty);
+    const txResult = await sendAction("startDifficulty", nextDifficulty);
+    if (!txResult) return;
+    await startGame(nextDifficulty, txResult.sessionId);
   }
 
   async function handlePlayAgain() {
@@ -206,8 +366,9 @@ export function Game() {
 
   async function handleRetrySameDifficulty() {
     if (!difficulty) return;
-    await sendAction("retrySameDifficulty", difficulty);
-    await startGame(difficulty);
+    const txResult = await sendAction("retrySameDifficulty", difficulty);
+    if (!txResult) return;
+    await startGame(difficulty, txResult.sessionId);
   }
 
   async function submitWord(event: FormEvent<HTMLFormElement>) {
@@ -274,7 +435,7 @@ export function Game() {
         <div className="header__actions">
           {miniAppDetected ? <Wallet /> : <InjectedWalletButton />}
         </div>
-        {txMessage && <p className="muted">{txMessage}</p>}
+          {txMessage && <p className="muted">{txMessage}</p>}
       </header>
 
       {screen === "select" && (
@@ -296,7 +457,7 @@ export function Game() {
                 </span>
                 <span className="button__meta">
                   {pendingAction === "startDifficulty"
-                    ? "Confirm in wallet..."
+                    ? pendingLabel || "Confirm in wallet..."
                     : `${DIFFICULTY_CONFIG[level].durationSec}s - ${DIFFICULTY_CONFIG[level].requiredCount} words`}
                 </span>
               </button>
@@ -430,7 +591,9 @@ export function Game() {
               onClick={handlePlayAgain}
               disabled={pendingAction === "playAgain"}
             >
-              {pendingAction === "playAgain" ? "Confirm in wallet..." : "Play again"}
+              {pendingAction === "playAgain"
+                ? pendingLabel || "Confirm in wallet..."
+                : "Play again"}
             </button>
             <button
               className="button button--ghost"
@@ -438,7 +601,7 @@ export function Game() {
               disabled={pendingAction === "retrySameDifficulty"}
             >
               {pendingAction === "retrySameDifficulty"
-                ? "Confirm in wallet..."
+                ? pendingLabel || "Confirm in wallet..."
                 : "Retry same difficulty"}
             </button>
           </div>

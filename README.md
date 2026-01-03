@@ -53,6 +53,8 @@ Create a `.env` file (or update the existing one):
 NEXT_PUBLIC_PROJECT_NAME="crossword"
 NEXT_PUBLIC_ONCHAINKIT_API_KEY=""
 NEXT_PUBLIC_ACTIONS_CONTRACT_ADDRESS="0x..."
+NEXT_PUBLIC_CHAIN_ID="8453"
+NEXT_PUBLIC_DEBUG_CROSSWORD="false"
 BASE_MAINNET_RPC_URL=""
 DEPLOYER_PRIVATE_KEY=""
 ```
@@ -87,6 +89,14 @@ Deploy to any Next.js-compatible host (Vercel, Netlify, Fly, etc.). Ensure:
 - The app is accessible at `/`
 - The manifest is accessible at `/.well-known/farcaster.json`
 - Static assets referenced in the manifest exist in `/public`
+
+### Vercel deployment checklist
+
+- `NEXT_PUBLIC_ACTIONS_CONTRACT_ADDRESS` is set to the deployed actions contract.
+- `NEXT_PUBLIC_CHAIN_ID` matches the chain the contract is deployed to (Base mainnet is `8453`).
+- `NEXT_PUBLIC_ONCHAINKIT_API_KEY` is set if you use OnchainKit features in production.
+- `NEXT_PUBLIC_DEBUG_CROSSWORD=true` (optional) to enable client-side debug logs.
+- Confirm the serverless bundle includes `node_modules/word-list/words.txt` via `outputFileTracingIncludes` for `/api/new-game` (configured in `next.config.ts`).
 
 ### Deploy the onchain actions contract (Base mainnet)
 

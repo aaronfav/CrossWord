@@ -1,15 +1,35 @@
 import fs from "fs";
-import wordListPath from "word-list";
+import path from "path";
 
 let cachedDictionary: Set<string> | null = null;
 
+const WORDLIST_RELATIVE_PATH = path.join(
+  "node_modules",
+  "word-list",
+  "words.txt",
+);
+
+export function getWordListPath(): string {
+  return path.join(process.cwd(), WORDLIST_RELATIVE_PATH);
+}
+
 export function loadDictionary(): Set<string> {
   if (cachedDictionary) return cachedDictionary;
-  const content = fs.readFileSync(wordListPath, "utf8");
+  const fullPath = getWordListPath();
+  if (!fs.existsSync(fullPath)) {
+    throw new Error(`WORDLIST_MISSING: ${fullPath}`);
+  }
+  const content = fs.readFileSync(fullPath, "utf8");
+  if (!content.trim()) {
+    throw new Error(`WORDLIST_EMPTY: ${fullPath}`);
+  }
   const words = content
     .split("\n")
     .map((word) => word.trim().toLowerCase())
     .filter((word) => word.length >= 3);
+  if (words.length === 0) {
+    throw new Error(`WORDLIST_EMPTY: ${fullPath}`);
+  }
   cachedDictionary = new Set(words);
   return cachedDictionary;
 }
