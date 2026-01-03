@@ -27,6 +27,18 @@ type BestScore = {
   timeUsed: number;
 };
 
+type NewGameResponse =
+  | {
+      rootWord: string;
+      durationSec: number;
+      requiredCount: number;
+    }
+  | {
+      error: string;
+      message?: string;
+      details?: string;
+    };
+
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 const ACTIONS_CONTRACT_ADDRESS =
   process.env.NEXT_PUBLIC_ACTIONS_CONTRACT_ADDRESS as
@@ -205,13 +217,7 @@ export function Game() {
       return;
     }
 
-    let data: {
-      rootWord?: string;
-      durationSec?: number;
-      requiredCount?: number;
-      error?: string;
-      details?: string;
-    } | null = null;
+    let data: NewGameResponse | null = null;
     try {
       data = await response.json();
     } catch (err) {
@@ -224,7 +230,11 @@ export function Game() {
         data,
       });
       const detail =
-        data?.message ?? data?.error ?? response.statusText;
+        (data &&
+          "message" in data &&
+          data.message) ||
+        (data && "error" in data && data.error) ||
+        response.statusText;
       setMessage(
         detail
           ? `Unable to start a new game: ${detail}`
