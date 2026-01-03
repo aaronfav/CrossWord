@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 import path from "path";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    outputFileTracingIncludes: {
+      "app/api/new-game/route": ["./node_modules/word-list/words.txt"],
+    },
+  },
   webpack: (config) => {
     config.externals.push("pino-pretty", "lokijs", "encoding");
     config.resolve = config.resolve ?? {};
