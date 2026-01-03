@@ -1,16 +1,10 @@
 import fs from "fs";
-import path from "path";
+import wordListPath from "word-list";
 
 let cachedDictionary: Set<string> | null = null;
 
-const WORDLIST_RELATIVE_PATH = path.join(
-  "node_modules",
-  "word-list",
-  "words.txt",
-);
-
 export function getWordListPath(): string {
-  return path.join(process.cwd(), WORDLIST_RELATIVE_PATH);
+  return wordListPath;
 }
 
 export function loadDictionary(): Set<string> {

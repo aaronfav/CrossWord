@@ -4,24 +4,12 @@ import path from "path";
 const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/new-game": [
-      "./node_modules/word-list/words.txt",
-      "node_modules/word-list/words.txt",
-      "node_modules/.pnpm/**/node_modules/word-list/words.txt",
-    ],
-    "app/api/new-game/route": [
-      "./node_modules/word-list/words.txt",
-      "node_modules/word-list/words.txt",
-      "node_modules/.pnpm/**/node_modules/word-list/words.txt",
+      "./node_modules/word-list/**",
+      "./node_modules/.pnpm/**/node_modules/word-list/**",
     ],
     "/api/reveal": [
-      "./node_modules/word-list/words.txt",
-      "node_modules/word-list/words.txt",
-      "node_modules/.pnpm/**/node_modules/word-list/words.txt",
-    ],
-    "app/api/reveal/route": [
-      "./node_modules/word-list/words.txt",
-      "node_modules/word-list/words.txt",
-      "node_modules/.pnpm/**/node_modules/word-list/words.txt",
+      "./node_modules/word-list/**",
+      "./node_modules/.pnpm/**/node_modules/word-list/**",
     ],
   },
   webpack: (config) => {
