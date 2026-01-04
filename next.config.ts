@@ -10,15 +10,6 @@ const nextConfig: NextConfig = {
       "./app/assets/word-list/**",
     ],
   },
-  async redirects() {
-    return [
-      {
-        source: "/well-known/farcaster.json",
-        destination: "/.well-known/farcaster.json",
-        permanent: false,
-      },
-    ];
-  },
   webpack: (config) => {
     config.externals.push("pino-pretty", "lokijs", "encoding");
     config.resolve = config.resolve ?? {};
