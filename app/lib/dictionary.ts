@@ -15,6 +15,9 @@ export function getWordListPath(): string {
   if (fs.existsSync(vendoredPath)) {
     return vendoredPath;
   }
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(`WORDLIST_MISSING: ${vendoredPath} (cwd: ${process.cwd()})`);
+  }
   return wordListPath;
 }
 
