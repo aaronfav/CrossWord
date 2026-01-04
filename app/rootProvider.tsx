@@ -1,13 +1,16 @@
 "use client";
-import { ReactNode, useEffect, useMemo } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { base } from "wagmi/chains";
 import { WagmiProvider, createConfig, createStorage, http } from "wagmi";
 import { injected } from "wagmi/connectors";
+import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
 import { OnchainKitProvider } from "@coinbase/onchainkit";
 import "@coinbase/onchainkit/styles.css";
 import { safeLocalStorage } from "./lib/safeStorage";
 
 export function RootProvider({ children }: { children: ReactNode }) {
+  const [isMiniApp, setIsMiniApp] = useState(false);
+
   useEffect(() => {
     if (process.env.NODE_ENV !== "production") {
       const hasStorage =
@@ -18,12 +21,34 @@ export function RootProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    const detectMiniApp = async () => {
+      try {
+        const sdk = await import("@farcaster/miniapp-sdk");
+        if (typeof sdk.isInMiniApp === "function") {
+          const detected = await sdk.isInMiniApp();
+          if (active) setIsMiniApp(Boolean(detected));
+        }
+      } catch (err) {
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("[crossword] miniapp detection failed", err);
+        }
+      }
+    };
+
+    detectMiniApp();
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const wagmiConfig = useMemo(
     () =>
       createConfig({
         chains: [base],
         transports: { [base.id]: http() },
-        connectors: [injected()],
+        connectors: [isMiniApp ? farcasterMiniApp() : injected()],
         storage: createStorage({
           storage: {
             getItem: (key) => safeLocalStorage.getItem(key),
@@ -32,7 +57,7 @@ export function RootProvider({ children }: { children: ReactNode }) {
           },
         }),
       }),
-    [],
+    [isMiniApp],
   );
 
   return (
