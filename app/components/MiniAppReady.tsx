@@ -1,20 +1,16 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { sdk } from "@farcaster/miniapp-sdk";
 
 async function detectMiniApp(): Promise<boolean> {
   if (typeof window === "undefined") return false;
   try {
-    const mod = await import("@farcaster/miniapp-sdk");
-    const detected = await mod.sdk?.isInMiniApp?.();
+    const detected = await sdk?.isInMiniApp?.();
     if (typeof detected !== "undefined") {
       return Boolean(detected);
     }
-    const legacyDetected = mod.sdk?.isMiniApp?.();
-    if (typeof legacyDetected !== "undefined") {
-      return Boolean(legacyDetected);
-    }
-    const contextValue = mod.sdk?.context;
+    const contextValue = sdk?.context;
     if (contextValue) {
       if (
         typeof (contextValue as Promise<unknown>).then === "function"
@@ -51,8 +47,6 @@ export function MiniAppReady({
         if (!active) return;
         onEnvironment?.(isMiniApp);
         if (!isMiniApp) return;
-        const mod = await import("@farcaster/miniapp-sdk").catch(() => null);
-        const sdk = mod?.sdk;
         const provider =
           (await sdk?.wallet?.getEthereumProvider?.()) ??
           sdk?.wallet?.ethProvider;

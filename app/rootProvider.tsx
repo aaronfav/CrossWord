@@ -4,6 +4,7 @@ import { base } from "wagmi/chains";
 import { WagmiProvider, createConfig, createStorage, http } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
+import { sdk } from "@farcaster/miniapp-sdk";
 import { OnchainKitProvider } from "@coinbase/onchainkit";
 import "@coinbase/onchainkit/styles.css";
 import { safeLocalStorage } from "./lib/safeStorage";
@@ -25,8 +26,7 @@ export function RootProvider({ children }: { children: ReactNode }) {
     let active = true;
     const detectMiniApp = async () => {
       try {
-        const mod = await import("@farcaster/miniapp-sdk");
-        const detected = await mod.sdk?.isInMiniApp?.();
+        const detected = await sdk?.isInMiniApp?.();
         if (active && typeof detected !== "undefined") {
           setIsMiniApp(Boolean(detected));
         }
