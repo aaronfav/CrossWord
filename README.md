@@ -62,15 +62,21 @@ DEPLOYER_PRIVATE_KEY=""
 `NEXT_PUBLIC_ONCHAINKIT_API_KEY` is only needed if you plan to use OnchainKit paymaster features later.
 `BASE_MAINNET_RPC_URL` and `DEPLOYER_PRIVATE_KEY` are used only for deployment.
 
-## Mini App manifest
+## Mini App manifest (hosted)
 
-The Farcaster/Base mini app manifest lives at `public/.well-known/farcaster.json` and is served at:
+This app uses the Farcaster hosted manifest flow. Configure a redirect so:
 
 ```
 https://<domain>/.well-known/farcaster.json
 ```
 
-Replace the `accountAssociation.header`, `payload`, and `signature` placeholders with values from the Base Build tool and Farcaster tooling.
+redirects to:
+
+```
+https://api.farcaster.xyz/miniapps/hosted-manifest/<HOSTED_MANIFEST_ID>
+```
+
+Set `FARCASTER_HOSTED_MANIFEST_ID` in your deployment environment (preferred) or `NEXT_PUBLIC_FARCASTER_HOSTED_MANIFEST_ID` for local testing.
 
 ## Mini App readiness
 
@@ -87,8 +93,21 @@ To verify locally:
 Deploy to any Next.js-compatible host (Vercel, Netlify, Fly, etc.). Ensure:
 
 - The app is accessible at `/`
-- The manifest is accessible at `/.well-known/farcaster.json`
+- `/.well-known/farcaster.json` redirects to the hosted manifest
 - Static assets referenced in the manifest exist in `/public`
+
+### Hosted manifest checklist
+
+1. Create a hosted manifest in the Farcaster tool and copy the manifest id.
+2. Set `FARCASTER_HOSTED_MANIFEST_ID` in Vercel (Project Settings → Environment Variables).
+3. Redeploy.
+4. Verify redirect:
+
+```bash
+curl -I https://<domain>/.well-known/farcaster.json
+```
+
+Expect a 307/308 redirect to `https://api.farcaster.xyz/miniapps/hosted-manifest/<HOSTED_MANIFEST_ID>`.
 
 ### Vercel deployment checklist
 
@@ -124,7 +143,7 @@ npm run test
 - `app/api/new-game`: new game endpoint
 - `app/api/validate`: server-side word validation
 - `app/api/reveal`: server-side sub-word reveal
-- `public/.well-known/farcaster.json`: mini app manifest
+- `next.config.ts`: hosted manifest redirect configuration
 
 ## Wallet behavior
 
