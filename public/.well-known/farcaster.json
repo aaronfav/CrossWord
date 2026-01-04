@@ -1,0 +1,27 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjY4MzIwMywidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweEFjYkNFMmE2NzkzZTE0MzlCMzcyMzY0OEMzMEFmQmM1MTdDMzI5NTQifQ",
+    "payload": "eyJkb21haW4iOiJjcm9zcy13b3JkLXNldmVuLnZlcmNlbC5hcHAifQ",
+    "signature": "qxVgt7rObZbIVDQ1ghRAq8ycrTMHNKIQwQ7VSlcRIAdFeEwDkrPspd2HaOb2DMFTUrpLKnjNlyD5XOpfWv7sZxw="
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "crossword",
+    "homeUrl": "https://cross-word-seven.vercel.app",
+    "iconUrl": "https://cross-word-seven.vercel.app/farcaster/icon.png",
+    "splashImageUrl": "https://cross-word-seven.vercel.app/farcaster/splash.png",
+    "splashBackgroundColor": "#05070A",
+    "primaryCategory": "games",
+    "tags": ["word", "puzzle", "base"],
+    "heroImageUrl": "https://cross-word-seven.vercel.app/farcaster/og.png",
+    "screenshotUrls": [
+      "https://cross-word-seven.vercel.app/screenshot-1.svg",
+      "https://cross-word-seven.vercel.app/screenshot-2.svg"
+    ],
+    "tagline": "Find every sub-word before the timer ends.",
+    "ogTitle": "Crossword",
+    "ogDescription": "Race the clock to form valid sub-words.",
+    "ogImageUrl": "https://cross-word-seven.vercel.app/farcaster/og.png",
+    "noindex": true
+  }
+}

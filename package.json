@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "postinstall": "node scripts/sync-wordlist.mjs",
-    "prebuild": "node scripts/sync-wordlist.mjs",
+    "postinstall": "node scripts/generate-brand-assets.mjs && node scripts/sync-wordlist.mjs",
+    "prebuild": "node scripts/generate-brand-assets.mjs && node scripts/sync-wordlist.mjs",
     "start": "next start",
     "lint": "next lint",
     "preinstall": "node scripts/check-node-version.mjs",
@@ -20,8 +20,8 @@
   "dependencies": {
     "@coinbase/onchainkit": "latest",
     "@farcaster/miniapp-sdk": "latest",
-    "@tanstack/react-query": "^5.81.5",
     "@metamask/sdk": "~0.33.1",
+    "@tanstack/react-query": "^5.81.5",
     "next": "15.3.8",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -39,6 +39,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.4",
     "hardhat": "^2.22.8",
+    "sharp": "^0.33.5",
     "typescript": "^5",
     "vitest": "^2.1.4"
   },

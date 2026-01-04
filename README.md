@@ -62,21 +62,15 @@ DEPLOYER_PRIVATE_KEY=""
 `NEXT_PUBLIC_ONCHAINKIT_API_KEY` is only needed if you plan to use OnchainKit paymaster features later.
 `BASE_MAINNET_RPC_URL` and `DEPLOYER_PRIVATE_KEY` are used only for deployment.
 
-## Mini App manifest (hosted)
+## Mini App manifest (self-hosted)
 
-This app uses the Farcaster hosted manifest flow. Configure a redirect so:
+This app ships a self-hosted Farcaster manifest at:
 
 ```
 https://<domain>/.well-known/farcaster.json
 ```
 
-redirects to:
-
-```
-https://api.farcaster.xyz/miniapps/hosted-manifest/<HOSTED_MANIFEST_ID>
-```
-
-Set `FARCASTER_HOSTED_MANIFEST_ID` in your deployment environment (preferred) or `NEXT_PUBLIC_FARCASTER_HOSTED_MANIFEST_ID` for local testing.
+The manifest references icon/splash/og images under `/public/farcaster`.
 
 ## Mini App readiness
 
@@ -93,21 +87,23 @@ To verify locally:
 Deploy to any Next.js-compatible host (Vercel, Netlify, Fly, etc.). Ensure:
 
 - The app is accessible at `/`
-- `/.well-known/farcaster.json` redirects to the hosted manifest
+- `/.well-known/farcaster.json` returns the self-hosted manifest
+- `/well-known/farcaster.json` redirects to `/.well-known/farcaster.json`
 - Static assets referenced in the manifest exist in `/public`
 
-### Hosted manifest checklist
+### Self-hosted manifest checklist
 
-1. Create a hosted manifest in the Farcaster tool and copy the manifest id.
-2. Set `FARCASTER_HOSTED_MANIFEST_ID` in Vercel (Project Settings → Environment Variables).
+1. Update `public/.well-known/farcaster.json` with the correct `accountAssociation` values.
+2. Ensure `/public/farcaster/icon.png` (and splash/og if used) exist.
 3. Redeploy.
-4. Verify redirect:
+4. Verify:
 
 ```bash
 curl -I https://<domain>/.well-known/farcaster.json
+curl -I https://<domain>/well-known/farcaster.json
 ```
 
-Expect a 307/308 redirect to `https://api.farcaster.xyz/miniapps/hosted-manifest/<HOSTED_MANIFEST_ID>`.
+Expect 200 for `/.well-known/farcaster.json` and a 307/308 redirect for `/well-known/farcaster.json`.
 
 ### Vercel deployment checklist
 
@@ -115,7 +111,7 @@ Expect a 307/308 redirect to `https://api.farcaster.xyz/miniapps/hosted-manifest
 - `NEXT_PUBLIC_CHAIN_ID` matches the chain the contract is deployed to (Base mainnet is `8453`).
 - `NEXT_PUBLIC_ONCHAINKIT_API_KEY` is set if you use OnchainKit features in production.
 - `NEXT_PUBLIC_DEBUG_CROSSWORD=true` (optional) to enable client-side debug logs.
-- Confirm the serverless bundle includes `node_modules/word-list/words.txt` via `outputFileTracingIncludes` for `/api/new-game` (configured in `next.config.ts`).
+- Confirm the serverless bundle includes `./app/assets/word-list/**` via `outputFileTracingIncludes` for `/api/new-game` (configured in `next.config.ts`).
 
 ### Deploy the onchain actions contract (Base mainnet)
 
@@ -143,7 +139,9 @@ npm run test
 - `app/api/new-game`: new game endpoint
 - `app/api/validate`: server-side word validation
 - `app/api/reveal`: server-side sub-word reveal
-- `next.config.ts`: hosted manifest redirect configuration
+- `public/.well-known/farcaster.json`: self-hosted Farcaster manifest
+- `public/farcaster`: generated Farcaster images
+- `scripts/generate-brand-assets.mjs`: image generation script
 
 ## Wallet behavior
 
