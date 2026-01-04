@@ -8,6 +8,32 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+const miniappEmbed = {
+  version: "1",
+  imageUrl: "https://cross-word-seven.vercel.app/embed.png",
+  button: {
+    title: "Play Crossword",
+    action: {
+      type: "launch_miniapp",
+      url: "https://cross-word-seven.vercel.app/",
+      name: "Crossword",
+    },
+  },
+};
+
+const frameEmbed = {
+  version: "1",
+  imageUrl: "https://cross-word-seven.vercel.app/embed.png",
+  button: {
+    title: "Play Crossword",
+    action: {
+      type: "launch_frame",
+      url: "https://cross-word-seven.vercel.app/",
+      name: "Crossword",
+    },
+  },
+};
+
 export const metadata: Metadata = {
   title: "Crossword",
   description:
@@ -25,6 +51,10 @@ export const metadata: Metadata = {
     description:
       "Build as many sub-words as you can before the timer hits zero.",
     images: ["/og.svg"],
+  },
+  other: {
+    "fc:miniapp": JSON.stringify(miniappEmbed),
+    "fc:frame": JSON.stringify(frameEmbed),
   },
 };
 
