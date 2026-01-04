@@ -4,12 +4,10 @@ import path from "path";
 const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/new-game": [
-      "./node_modules/word-list/**",
-      "./node_modules/.pnpm/**/node_modules/word-list/**",
+      "./app/assets/word-list/**",
     ],
     "/api/reveal": [
-      "./node_modules/word-list/**",
-      "./node_modules/.pnpm/**/node_modules/word-list/**",
+      "./app/assets/word-list/**",
     ],
   },
   webpack: (config) => {

@@ -1,9 +1,20 @@
 import fs from "fs";
+import path from "path";
 import wordListPath from "word-list";
 
 let cachedDictionary: Set<string> | null = null;
 
 export function getWordListPath(): string {
+  const vendoredPath = path.join(
+    process.cwd(),
+    "app",
+    "assets",
+    "word-list",
+    "words.txt",
+  );
+  if (fs.existsSync(vendoredPath)) {
+    return vendoredPath;
+  }
   return wordListPath;
 }
 

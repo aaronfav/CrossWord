@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "prebuild": "node scripts/sync-wordlist.mjs",
     "start": "next start",
     "lint": "next lint",
     "preinstall": "node scripts/check-node-version.mjs",
