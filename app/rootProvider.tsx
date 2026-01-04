@@ -25,10 +25,10 @@ export function RootProvider({ children }: { children: ReactNode }) {
     let active = true;
     const detectMiniApp = async () => {
       try {
-        const sdk = await import("@farcaster/miniapp-sdk");
-        if (typeof sdk.isInMiniApp === "function") {
-          const detected = await sdk.isInMiniApp();
-          if (active) setIsMiniApp(Boolean(detected));
+        const mod = await import("@farcaster/miniapp-sdk");
+        const detected = await mod.sdk?.isInMiniApp?.();
+        if (active && typeof detected !== "undefined") {
+          setIsMiniApp(Boolean(detected));
         }
       } catch (err) {
         if (process.env.NODE_ENV !== "production") {

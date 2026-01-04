@@ -5,22 +5,16 @@ import { useEffect, useRef } from "react";
 async function detectMiniApp(): Promise<boolean> {
   if (typeof window === "undefined") return false;
   try {
-    const imported = await import("@farcaster/miniapp-sdk");
-    const sdk = (imported as { default?: unknown }).default ?? imported;
-    if (
-      typeof (sdk as { isInMiniApp?: () => Promise<boolean> })?.isInMiniApp ===
-      "function"
-    ) {
-      return Boolean(
-        await (sdk as { isInMiniApp: () => Promise<boolean> }).isInMiniApp(),
-      );
+    const mod = await import("@farcaster/miniapp-sdk");
+    const detected = await mod.sdk?.isInMiniApp?.();
+    if (typeof detected !== "undefined") {
+      return Boolean(detected);
     }
-    if (
-      typeof (sdk as { isMiniApp?: () => boolean })?.isMiniApp === "function"
-    ) {
-      return Boolean((sdk as { isMiniApp: () => boolean }).isMiniApp());
+    const legacyDetected = mod.sdk?.isMiniApp?.();
+    if (typeof legacyDetected !== "undefined") {
+      return Boolean(legacyDetected);
     }
-    const contextValue = (sdk as { context?: unknown })?.context;
+    const contextValue = mod.sdk?.context;
     if (contextValue) {
       if (
         typeof (contextValue as Promise<unknown>).then === "function"
@@ -57,25 +51,21 @@ export function MiniAppReady({
         if (!active) return;
         onEnvironment?.(isMiniApp);
         if (!isMiniApp) return;
-        const imported = await import("@farcaster/miniapp-sdk").catch(() => null);
-        const sdk = imported
-          ? ((imported as { default?: unknown }).default ?? imported)
-          : null;
+        const mod = await import("@farcaster/miniapp-sdk").catch(() => null);
+        const sdk = mod?.sdk;
+        const provider =
+          (await sdk?.wallet?.getEthereumProvider?.()) ??
+          sdk?.wallet?.ethProvider;
         if (
           typeof window !== "undefined" &&
           !(window as unknown as { ethereum?: unknown }).ethereum &&
-          (sdk as { wallet?: { ethProvider?: unknown } })?.wallet?.ethProvider
+          provider
         ) {
-          (window as unknown as { ethereum?: unknown }).ethereum = (
-            sdk as { wallet: { ethProvider: unknown } }
-          ).wallet.ethProvider;
+          (window as unknown as { ethereum?: unknown }).ethereum = provider;
         }
-        if (
-          (sdk as { actions?: { ready?: () => void } })?.actions?.ready &&
-          !hasCalled.current
-        ) {
+        if (sdk?.actions?.ready && !hasCalled.current) {
           hasCalled.current = true;
-          (sdk as { actions: { ready: () => void } }).actions.ready();
+          sdk.actions.ready();
           onDetected?.();
         }
       })
