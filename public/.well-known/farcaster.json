@@ -7,10 +7,30 @@
   "frame": {
     "version": "1",
     "name": "Crossword",
+    "subtitle": "Daily crossword puzzle",
+    "description": "Solve a quick crossword, then share and challenge friends on Farcaster.",
     "iconUrl": "https://cross-word-seven.vercel.app/crossword.png",
     "homeUrl": "https://cross-word-seven.vercel.app",
     "imageUrl": "https://cross-word-seven.vercel.app/crossword.png",
+    "heroImageUrl": "https://cross-word-seven.vercel.app/hero.png",
     "buttonTitle": "Play Crossword",
+    "tagline": "Solve and share fast",
+    "primaryCategory": "games",
+    "tags": [
+      "crossword",
+      "puzzle",
+      "wordgame",
+      "daily",
+      "brain"
+    ],
+    "screenshotUrls": [
+      "https://cross-word-seven.vercel.app/screenshots/1.png",
+      "https://cross-word-seven.vercel.app/screenshots/2.png",
+      "https://cross-word-seven.vercel.app/screenshots/3.png"
+    ],
+    "ogTitle": "Crossword",
+    "ogDescription": "Play a quick crossword and share your solve.",
+    "ogImageUrl": "https://cross-word-seven.vercel.app/og.png",
     "splashImageUrl": "https://cross-word-seven.vercel.app/crossword.png",
     "splashBackgroundColor": "#0b0f14",
     "webhookUrl": "https://cross-word-seven.vercel.app/api/webhook"
