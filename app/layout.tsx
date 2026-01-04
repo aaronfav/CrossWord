@@ -10,7 +10,7 @@ const inter = Inter({
 
 const miniappEmbed = {
   version: "1",
-  imageUrl: "https://cross-word-seven.vercel.app/embed.png",
+  imageUrl: "https://cross-word-seven.vercel.app/crossword.png",
   button: {
     title: "Play Crossword",
     action: {
@@ -23,7 +23,7 @@ const miniappEmbed = {
 
 const frameEmbed = {
   version: "1",
-  imageUrl: "https://cross-word-seven.vercel.app/embed.png",
+  imageUrl: "https://cross-word-seven.vercel.app/crossword.png",
   button: {
     title: "Play Crossword",
     action: {
