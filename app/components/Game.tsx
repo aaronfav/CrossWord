@@ -19,6 +19,10 @@ import { addUniqueWord, normalizeWord } from "../lib/wordUtils";
 import { MiniAppReady } from "./MiniAppReady";
 import { actionsAbi } from "../lib/actionsAbi";
 import { safeLocalStorage } from "../lib/safeStorage";
+import {
+  DIFFICULTY_CONTRACTS,
+  DIFFICULTY_TX_VALUE,
+} from "@/src/config/difficultyContracts";
 
 type GameState = "select" | "play" | "result";
 
@@ -58,15 +62,13 @@ const ACTIONS_CONTRACT_ADDRESS =
   process.env.NEXT_PUBLIC_ACTIONS_CONTRACT_ADDRESS as
     | `0x${string}`
     | undefined;
-const EXPECTED_CHAIN_ID = Number(
-  process.env.NEXT_PUBLIC_CHAIN_ID ?? base.id,
-);
+const BASE_CHAIN_ID = base.id;
+const EXPECTED_CHAIN_ID = BASE_CHAIN_ID;
 const DEBUG_ENABLED =
   process.env.NEXT_PUBLIC_DEBUG_CROSSWORD === "true";
 const EXPECTED_CHAIN_LABEL =
-  EXPECTED_CHAIN_ID === base.id
-    ? base.name
-    : `chain ${EXPECTED_CHAIN_ID}`;
+  EXPECTED_CHAIN_ID === base.id ? base.name : `chain ${EXPECTED_CHAIN_ID}`;
+const BASESCAN_TX_URL = "https://basescan.org/tx/";
 
 const DIFFICULTY_ENUM: Record<Difficulty, number> = {
   easy: 0,
@@ -140,12 +142,13 @@ export function Game() {
   const [endTime, setEndTime] = useState<number | null>(null);
   const [miniAppDetected, setMiniAppDetected] = useState(false);
   const [txMessage, setTxMessage] = useState("");
+  const [txHash, setTxHash] = useState<`0x${string}` | null>(null);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [pendingLabel, setPendingLabel] = useState("");
   const { writeContractAsync } = useWriteContract();
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
-  const publicClient = usePublicClient();
+  const publicClient = usePublicClient({ chainId: BASE_CHAIN_ID });
 
   const timeUsed = useMemo(() => {
     if (!startTime) return 0;
@@ -204,7 +207,6 @@ export function Game() {
     sessionId?: string,
   ) {
     setMessage("");
-    setTxMessage("");
     setPendingLabel("");
     setPossibleWords([]);
     setFoundWords([]);
@@ -275,6 +277,7 @@ export function Game() {
     action: "startDifficulty" | "playAgain" | "retrySameDifficulty",
     actionDifficulty: Difficulty,
   ) {
+    setTxHash(null);
     if (!ACTIONS_CONTRACT_ADDRESS) {
       const err =
         "Missing NEXT_PUBLIC_ACTIONS_CONTRACT_ADDRESS. Set it in your deployment env.";
@@ -325,6 +328,7 @@ export function Game() {
         abi: actionsAbi,
         functionName: action,
         args: [DIFFICULTY_ENUM[actionDifficulty]],
+        chainId: BASE_CHAIN_ID,
       });
       debugLog("tx submitted", { hash });
       setPendingLabel("Waiting for confirmation...");
@@ -373,8 +377,81 @@ export function Game() {
     }
   }
 
+  async function sendDifficultyTransaction(
+    actionDifficulty: Difficulty,
+  ) {
+    setTxHash(null);
+    if (!isConnected || !address) {
+      const err = "Connect a wallet before starting a game.";
+      setMessage(err);
+      setTxMessage(err);
+      return null;
+    }
+    if (chainId !== BASE_CHAIN_ID) {
+      const err = `Wrong network. Switch to ${base.name} to continue.`;
+      setMessage(err);
+      setTxMessage(err);
+      try {
+        await switchChainAsync({ chainId: BASE_CHAIN_ID });
+      } catch (err) {
+        console.error("[crossword] switch chain failed", err);
+      }
+      return null;
+    }
+    if (!publicClient) {
+      setMessage("Blockchain client unavailable. Reload and try again.");
+      return null;
+    }
+    const contract = DIFFICULTY_CONTRACTS[actionDifficulty];
+    setPendingAction("startDifficulty");
+    setPendingLabel("Confirm in wallet...");
+    debugLog("sendDifficultyTransaction", {
+      difficulty: actionDifficulty,
+      chainId,
+      address,
+      contract: contract.address,
+    });
+    try {
+      const hash = await writeContractAsync({
+        address: contract.address,
+        abi: contract.abi,
+        functionName: contract.functionName,
+        value: DIFFICULTY_TX_VALUE,
+        chainId: BASE_CHAIN_ID,
+      });
+      debugLog("tx submitted", { hash });
+      setTxHash(hash);
+      setTxMessage("Transaction sent.");
+      setPendingLabel("Waiting for confirmation...");
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash,
+      });
+      debugLog("tx receipt", {
+        status: receipt.status,
+        hash: receipt.transactionHash,
+      });
+      if (receipt.status !== "success") {
+        setTxMessage("Transaction reverted. Try again.");
+        return null;
+      }
+      setTxMessage("Transaction confirmed.");
+      return {
+        hash,
+        receiptStatus: receipt.status,
+        sessionId: hash,
+      };
+    } catch (err) {
+      console.error("[crossword] transaction error", err);
+      setTxMessage("Transaction rejected or failed.");
+      return null;
+    } finally {
+      setPendingAction(null);
+      setPendingLabel("");
+    }
+  }
+
   async function handleStartDifficulty(nextDifficulty: Difficulty) {
-    const txResult = await sendAction("startDifficulty", nextDifficulty);
+    const txResult = await sendDifficultyTransaction(nextDifficulty);
     if (!txResult) return;
     await startGame(nextDifficulty, txResult.sessionId);
   }
@@ -459,7 +536,23 @@ export function Game() {
         <div className="header__actions">
           {miniAppDetected ? <Wallet /> : <InjectedWalletButton />}
         </div>
-          {txMessage && <p className="muted">{txMessage}</p>}
+        {txMessage && (
+          <p className="muted">
+            {txMessage}
+            {txHash && (
+              <>
+                {" "}
+                <a
+                  href={`${BASESCAN_TX_URL}${txHash}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View on BaseScan
+                </a>
+              </>
+            )}
+          </p>
+        )}
       </header>
 
       {screen === "select" && (
