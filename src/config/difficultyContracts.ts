@@ -1,6 +1,6 @@
 import { parseAbi } from "viem";
 
-export const DIFFICULTY_TX_VALUE = 500_000_000_000n;
+export const DIFFICULTY_TX_VALUE = BigInt("500000000000");
 
 export const DIFFICULTY_CONTRACTS = {
   easy: {
