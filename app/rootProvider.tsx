@@ -8,6 +8,7 @@ import { sdk } from "@farcaster/miniapp-sdk";
 import { OnchainKitProvider } from "@coinbase/onchainkit";
 import "@coinbase/onchainkit/styles.css";
 import { safeLocalStorage } from "./lib/safeStorage";
+import { BUILDER_DATA_SUFFIX } from "@/lib/builderAttribution";
 
 export function RootProvider({ children }: { children: ReactNode }) {
   const [isMiniApp, setIsMiniApp] = useState(false);
@@ -49,6 +50,7 @@ export function RootProvider({ children }: { children: ReactNode }) {
         chains: [base],
         transports: { [base.id]: http() },
         connectors: [isMiniApp ? farcasterMiniApp() : injected()],
+        dataSuffix: BUILDER_DATA_SUFFIX,
         storage: createStorage({
           storage: {
             getItem: (key) => safeLocalStorage.getItem(key),
@@ -56,7 +58,7 @@ export function RootProvider({ children }: { children: ReactNode }) {
             removeItem: (key) => safeLocalStorage.removeItem(key),
           },
         }),
-      }),
+      } as never),
     [isMiniApp],
   );
 
