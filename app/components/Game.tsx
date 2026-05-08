@@ -9,7 +9,6 @@ import {
   useDisconnect,
   usePublicClient,
   useSwitchChain,
-  useWriteContract,
 } from "wagmi";
 import { injected } from "wagmi/connectors";
 import { base } from "wagmi/chains";
@@ -23,6 +22,7 @@ import {
   DIFFICULTY_CONTRACTS,
   DIFFICULTY_TX_VALUE,
 } from "@/src/config/difficultyContracts";
+import { useBuilderWriteContract } from "@/lib/builderHooks";
 
 type GameState = "select" | "play" | "result";
 
@@ -145,7 +145,7 @@ export function Game() {
   const [txHash, setTxHash] = useState<`0x${string}` | null>(null);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [pendingLabel, setPendingLabel] = useState("");
-  const { writeContractAsync } = useWriteContract();
+  const { writeContractAsync } = useBuilderWriteContract();
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
   const publicClient = usePublicClient({ chainId: BASE_CHAIN_ID });
